@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tecnoflix/features/favorite/favorite_screen.dart';
 import 'package:tecnoflix/features/search/search_screen.dart';
+
 import 'home_screen.dart';
 
 class HomeNavHost extends StatefulWidget {

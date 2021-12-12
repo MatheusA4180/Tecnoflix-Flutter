@@ -1,26 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tecnoflix/data/remote/firebase_firestore.dart';
 import 'package:tecnoflix/model/favorite.dart';
-import 'package:tecnoflix/utils/helper_functions.dart';
+import 'package:tecnoflix/model/resource.dart';
 
 const String urlImage = "https://image.tmdb.org/t/p/w500/";
 
-List<Favorite> dbFavoriteMovie = [];
-
 class InfoMovieScreen extends StatefulWidget {
-
   final Favorite favoriteMovie;
 
-  InfoMovieScreen(
-      this.favoriteMovie
-  );
+  InfoMovieScreen(this.favoriteMovie);
 
   @override
   State<StatefulWidget> createState() => _InfoMovieScreen(favoriteMovie);
 }
 
 class _InfoMovieScreen extends State<InfoMovieScreen> {
-
   final Favorite favoriteMovie;
 
   _InfoMovieScreen(this.favoriteMovie);
@@ -30,13 +25,21 @@ class _InfoMovieScreen extends State<InfoMovieScreen> {
   @override
   void initState() {
     super.initState();
-    for (var element in dbFavoriteMovie) {
-      if (element.title == favoriteMovie.title) {
-        setState(() {
-          stateFavorite = Icons.favorite;
-        });
-      }
+    searchFavoriteById(favoriteMovie.id)
+        .then((value) => _setStateFavoriteIcon(value));
+  }
+
+  _setStateFavoriteIcon(Resource value) {
+    if (value.result) {
+      setState(() {
+        stateFavorite = Icons.favorite;
+      });
     }
+  }
+
+  showStatusToUser(Resource value, BuildContext context) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(value.descriptionError)));
   }
 
   @override
@@ -54,11 +57,12 @@ class _InfoMovieScreen extends State<InfoMovieScreen> {
               setState(() {
                 if (stateFavorite == Icons.favorite_border) {
                   stateFavorite = Icons.favorite;
-                  dbFavoriteMovie.add(favoriteMovie);
+                  addFavorite(favoriteMovie)
+                      .then((value) => showStatusToUser(value, context));
                 } else {
                   stateFavorite = Icons.favorite_border;
-                  dbFavoriteMovie
-                      .removeWhere((element) => element.title == favoriteMovie.title);
+                  removeFavorite(favoriteMovie)
+                      .then((value) => showStatusToUser(value, context));
                 }
               });
             },
@@ -80,11 +84,9 @@ class _InfoMovieScreen extends State<InfoMovieScreen> {
 }
 
 class InfoMovieBody extends StatelessWidget {
-
   final Favorite favoriteMovie;
 
   InfoMovieBody(this.favoriteMovie);
-
 
   @override
   Widget build(BuildContext context) {

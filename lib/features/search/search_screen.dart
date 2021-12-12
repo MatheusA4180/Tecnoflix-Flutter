@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -85,7 +84,6 @@ class _SearchScreen extends State<SearchScreen> {
                 flex: 8,
                 child: TextField(
                   controller: textSearch,
-                  cursorColor: const Color.fromARGB(255, 255, 22, 22),
                   decoration: const InputDecoration(
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(4)),

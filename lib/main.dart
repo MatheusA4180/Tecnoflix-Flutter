@@ -13,7 +13,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Splash Screen',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color.fromARGB(255, 255, 22, 22),
+          selectionColor: Color.fromARGB(255, 255, 22, 22),
+          selectionHandleColor: Color.fromARGB(255, 255, 22, 22),
+        ),
       ),
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,

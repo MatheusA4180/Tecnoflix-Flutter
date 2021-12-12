@@ -1,5 +1,6 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:tecnoflix/model/movie.dart';
 
 const String url = "https://api.themoviedb.org/3/";

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tecnoflix/data/remote/firebase_firestore.dart';
 import 'package:tecnoflix/features/infomovie/info_movie.dart';
 import 'package:tecnoflix/model/favorite.dart';
 
@@ -24,7 +25,13 @@ class _FavoriteScreen extends State<FavoriteScreen> {
 
   Future<void> _requestFavoriteMovies() async {
     setState(() {
-      favoriteMovies = dbFavoriteMovie;
+      returnFavorites().then((value) => _setStateFavoritesList(value));
+    });
+  }
+
+  _setStateFavoritesList(List<Favorite> value) {
+    setState(() {
+      favoriteMovies = value;
     });
   }
 

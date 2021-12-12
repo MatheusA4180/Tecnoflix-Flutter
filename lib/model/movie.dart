@@ -28,6 +28,5 @@ class Movie {
       this.title,
       this.video,
       this.voteAverage,
-      this.voteCount
-  );
+      this.voteCount);
 }
