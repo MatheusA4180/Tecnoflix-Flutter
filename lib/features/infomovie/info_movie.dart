@@ -1,53 +1,29 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tecnoflix/model/favorite.dart';
+import 'package:tecnoflix/utils/helper_functions.dart';
 
 const String urlImage = "https://image.tmdb.org/t/p/w500/";
 
 List<Favorite> dbFavoriteMovie = [];
 
 class InfoMovieScreen extends StatefulWidget {
-  final int id;
-  final String overview;
-  final String posterPath;
-  final String releaseDate;
-  final String title;
-  final String voteAverage;
-  final int voteCount;
+
+  final Favorite favoriteMovie;
 
   InfoMovieScreen(
-    this.id,
-    this.overview,
-    this.posterPath,
-    this.releaseDate,
-    this.title,
-    this.voteAverage,
-    this.voteCount,
+      this.favoriteMovie
   );
 
   @override
-  State<StatefulWidget> createState() => _InfoMovieScreen(
-      id, overview, posterPath, releaseDate, title, voteAverage, voteCount);
+  State<StatefulWidget> createState() => _InfoMovieScreen(favoriteMovie);
 }
 
 class _InfoMovieScreen extends State<InfoMovieScreen> {
-  final int id;
-  final String overview;
-  final String posterPath;
-  final String releaseDate;
-  final String title;
-  final String voteAverage;
-  final int voteCount;
 
-  _InfoMovieScreen(
-    this.id,
-    this.overview,
-    this.posterPath,
-    this.releaseDate,
-    this.title,
-    this.voteAverage,
-    this.voteCount,
-  );
+  final Favorite favoriteMovie;
+
+  _InfoMovieScreen(this.favoriteMovie);
 
   var stateFavorite = Icons.favorite_border;
 
@@ -55,7 +31,7 @@ class _InfoMovieScreen extends State<InfoMovieScreen> {
   void initState() {
     super.initState();
     for (var element in dbFavoriteMovie) {
-      if (element.title == title) {
+      if (element.title == favoriteMovie.title) {
         setState(() {
           stateFavorite = Icons.favorite;
         });
@@ -78,12 +54,11 @@ class _InfoMovieScreen extends State<InfoMovieScreen> {
               setState(() {
                 if (stateFavorite == Icons.favorite_border) {
                   stateFavorite = Icons.favorite;
-                  dbFavoriteMovie.add(Favorite(id, overview, posterPath,
-                      releaseDate, title, voteAverage, voteCount));
+                  dbFavoriteMovie.add(favoriteMovie);
                 } else {
                   stateFavorite = Icons.favorite_border;
                   dbFavoriteMovie
-                      .removeWhere((element) => element.title == title);
+                      .removeWhere((element) => element.title == favoriteMovie.title);
                 }
               });
             },
@@ -98,31 +73,18 @@ class _InfoMovieScreen extends State<InfoMovieScreen> {
           },
         ),
       ),
-      body: InfoMovieBody(
-          id, overview, posterPath, releaseDate, title, voteAverage, voteCount),
+      body: InfoMovieBody(favoriteMovie),
       backgroundColor: const Color.fromARGB(100, 51, 51, 51),
     );
   }
 }
 
 class InfoMovieBody extends StatelessWidget {
-  final int id;
-  final String overview;
-  final String posterPath;
-  final String releaseDate;
-  final String title;
-  final String voteAverage;
-  final int voteCount;
 
-  InfoMovieBody(
-    this.id,
-    this.overview,
-    this.posterPath,
-    this.releaseDate,
-    this.title,
-    this.voteAverage,
-    this.voteCount,
-  );
+  final Favorite favoriteMovie;
+
+  InfoMovieBody(this.favoriteMovie);
+
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +97,7 @@ class InfoMovieBody extends StatelessWidget {
               padding:
                   const EdgeInsets.only(top: 20.0, left: 16.0, bottom: 8.0),
               child: Text(
-                title,
+                favoriteMovie.title,
                 style: const TextStyle(
                     fontSize: 20.0,
                     color: Colors.white,
@@ -149,7 +111,7 @@ class InfoMovieBody extends StatelessWidget {
                 flex: 5,
                 child: Container(
                   margin: const EdgeInsets.only(top: 24.0, left: 24.0),
-                  child: Image.network("$urlImage$posterPath"),
+                  child: Image.network("$urlImage${favoriteMovie.posterPath}"),
                 ),
               ),
               Expanded(
@@ -176,7 +138,7 @@ class InfoMovieBody extends StatelessWidget {
                         padding: const EdgeInsets.only(
                             top: 4.0, left: 16.0, bottom: 8.0),
                         child: Text(
-                          releaseDate,
+                          favoriteMovie.releaseDate,
                           style: const TextStyle(
                             fontSize: 16.0,
                             color: Colors.white,
@@ -204,7 +166,7 @@ class InfoMovieBody extends StatelessWidget {
                         padding: const EdgeInsets.only(
                             top: 4.0, left: 16.0, bottom: 8.0),
                         child: Text(
-                          voteAverage,
+                          favoriteMovie.voteAverage,
                           style: const TextStyle(
                             fontSize: 16.0,
                             color: Colors.white,
@@ -232,7 +194,7 @@ class InfoMovieBody extends StatelessWidget {
                         padding: const EdgeInsets.only(
                             top: 4.0, left: 16.0, bottom: 8.0),
                         child: Text(
-                          voteCount.toString(),
+                          favoriteMovie.voteCount.toString(),
                           style: const TextStyle(
                             fontSize: 16.0,
                             color: Colors.white,
@@ -265,7 +227,7 @@ class InfoMovieBody extends StatelessWidget {
               padding: const EdgeInsets.only(
                   top: 4.0, left: 16.0, right: 24, bottom: 8.0),
               child: Text(
-                overview,
+                favoriteMovie.overview,
                 style: const TextStyle(
                   fontSize: 16.0,
                   color: Colors.white,

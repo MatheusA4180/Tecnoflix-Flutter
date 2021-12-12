@@ -4,7 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:tecnoflix/features/infomovie/info_movie.dart';
+import 'package:tecnoflix/model/favorite.dart';
 import 'package:tecnoflix/model/movie.dart';
+import 'package:tecnoflix/utils/helper_functions.dart';
 
 const String url = "https://api.themoviedb.org/3/";
 const String apiKey = "c87a59110d1715855dac83ccfc5c2640";
@@ -45,7 +47,7 @@ class _SearchScreen extends State<SearchScreen> {
             moviesJson["results"][element]["overview"],
             moviesJson["results"][element]["popularity"].toString(),
             moviesJson["results"][element]["poster_path"],
-            moviesJson["results"][element]["release_date"],
+            formatDate(moviesJson["results"][element]["release_date"]),
             moviesJson["results"][element]["title"],
             moviesJson["results"][element]["video"],
             moviesJson["results"][element]["vote_average"].toString(),
@@ -61,61 +63,195 @@ class _SearchScreen extends State<SearchScreen> {
     return Builder(
       builder: (context) => SingleChildScrollView(
           child: Column(
-        children: [
-          SizedBox(
-            height: 48,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 8,
-                  child: TextField(
-                    controller: textSearch,
-                    cursorColor: const Color.fromARGB(255, 255, 22, 22),
-                    decoration: const InputDecoration(
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
-                        borderSide: BorderSide(
-                          width: 1,
-                          color: Color.fromARGB(255, 255, 22, 22),
-                        ),
-                      ),
-                      labelStyle: TextStyle(
-                        color: Color.fromARGB(255, 255, 22, 22),
-                      ),
-                      hintText: 'Buscar título ',
-                      hintStyle:
-                          TextStyle(color: Color.fromARGB(255, 255, 22, 22)),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: IconButton(
-                      onPressed: () {
-                        _requestSearchMovies();
-                      },
-                      icon: const Icon(
-                        Icons.search,
-                        color: Colors.white,
-                      )),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 165 * foundMovies.length.toDouble(),
-            child: ListView.builder(
-              itemCount: foundMovies.length,
-              itemBuilder: (BuildContext context, int position) {
-                return _buildItemList(position);
-              },
-            ),
-          ),
-        ],
+        children: renderWidgets()//[
+          // SizedBox(
+          //   height: 48,
+          //   child: Row(
+          //     children: [
+          //       Expanded(
+          //         flex: 8,
+          //         child: TextField(
+          //           controller: textSearch,
+          //           cursorColor: const Color.fromARGB(255, 255, 22, 22),
+          //           decoration: const InputDecoration(
+          //             focusedBorder: OutlineInputBorder(
+          //               borderRadius: BorderRadius.all(Radius.circular(4)),
+          //               borderSide: BorderSide(
+          //                 width: 1,
+          //                 color: Color.fromARGB(255, 255, 22, 22),
+          //               ),
+          //             ),
+          //             labelStyle: TextStyle(
+          //               color: Color.fromARGB(255, 255, 22, 22),
+          //             ),
+          //             hintText: 'Buscar título ',
+          //             hintStyle:
+          //                 TextStyle(color: Color.fromARGB(255, 255, 22, 22)),
+          //             filled: true,
+          //             fillColor: Colors.white,
+          //           ),
+          //         ),
+          //       ),
+          //       Expanded(
+          //         flex: 2,
+          //         child: IconButton(
+          //             onPressed: () {
+          //               _requestSearchMovies();
+          //             },
+          //             icon: const Icon(
+          //               Icons.search,
+          //               color: Colors.white,
+          //             )),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          // SizedBox(
+          //   height: 165 * foundMovies.length.toDouble(),
+          //   child: ListView.builder(
+          //     itemCount: foundMovies.length,
+          //     itemBuilder: (BuildContext context, int position) {
+          //       return _buildItemList(position);
+          //     },
+          //   ),
+          // ),
+        //],
       )),
     );
+  }
+
+  List<Widget> renderWidgets() {
+    List<Widget> list = [];
+
+    list.add(
+      SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            Expanded(
+              flex: 8,
+              child: TextField(
+                controller: textSearch,
+                cursorColor: const Color.fromARGB(255, 255, 22, 22),
+                decoration: const InputDecoration(
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                    borderSide: BorderSide(
+                      width: 1,
+                      color: Color.fromARGB(255, 255, 22, 22),
+                    ),
+                  ),
+                  labelStyle: TextStyle(
+                    color: Color.fromARGB(255, 255, 22, 22),
+                  ),
+                  hintText: 'Buscar título ',
+                  hintStyle: TextStyle(color: Color.fromARGB(255, 255, 22, 22)),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: IconButton(
+                  onPressed: () {
+                    _requestSearchMovies();
+                  },
+                  icon: const Icon(
+                    Icons.search,
+                    color: Colors.white,
+                  )),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (foundMovies.isEmpty) {
+      list.add(Container(width: 120));
+    } else {
+      for (var position = 0; position < foundMovies.length; position++) {
+        list.add(InkWell(
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Container(
+                  height: 120,
+                  margin:
+                      const EdgeInsets.only(top: 12.0, left: 8.0, bottom: 12.0),
+                  child: Image.network(
+                      "$urlImage${foundMovies[position].posterPath}"),
+                ),
+              ),
+              Expanded(
+                flex: 7,
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.only(left: 16.0, right: 40),
+                        child: Text(
+                          foundMovies[position].title,
+                          style: const TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                            top: 12.0, left: 16.0, right: 20),
+                        child: const Text(
+                          "Data de lançamento:",
+                          style: TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                            top: 4.0, left: 16.0, right: 20),
+                        child: Text(
+                          foundMovies[position].releaseDate,
+                          style: const TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => InfoMovieScreen(Favorite(
+                        foundMovies[position].id,
+                        foundMovies[position].overview,
+                        foundMovies[position].posterPath!,
+                        foundMovies[position].releaseDate,
+                        foundMovies[position].title,
+                        foundMovies[position].voteAverage,
+                        foundMovies[position].voteCount))));
+          },
+        ));
+      }
+    }
+
+    return list;
   }
 
   Widget _buildItemList(int position) {
@@ -189,14 +325,14 @@ class _SearchScreen extends State<SearchScreen> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) => InfoMovieScreen(
+                  builder: (BuildContext context) => InfoMovieScreen(Favorite(
                       foundMovies[position].id,
                       foundMovies[position].overview,
                       foundMovies[position].posterPath!,
                       foundMovies[position].releaseDate,
                       foundMovies[position].title,
                       foundMovies[position].voteAverage,
-                      foundMovies[position].voteCount)));
+                      foundMovies[position].voteCount))));
         },
       );
     }

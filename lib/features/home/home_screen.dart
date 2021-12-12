@@ -3,8 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:tecnoflix/features/infomovie/info_movie.dart';
+import 'package:tecnoflix/model/favorite.dart';
 import 'package:tecnoflix/model/movie.dart';
 import 'package:intl/intl.dart';
+import 'package:tecnoflix/utils/helper_functions.dart';
 
 const String url = "https://api.themoviedb.org/3/";
 const String apiKey = "c87a59110d1715855dac83ccfc5c2640";
@@ -51,7 +53,7 @@ class _HomeScreen extends State<HomeScreen> {
               moviesJson["results"][element]["overview"],
               moviesJson["results"][element]["popularity"].toString(),
               moviesJson["results"][element]["poster_path"],
-              moviesJson["results"][element]["release_date"],
+              formatDate(moviesJson["results"][element]["release_date"]),
               moviesJson["results"][element]["title"],
               moviesJson["results"][element]["video"],
               moviesJson["results"][element]["vote_average"].toString(),
@@ -87,7 +89,7 @@ class _HomeScreen extends State<HomeScreen> {
                 moviesJson["results"][element]["overview"],
                 moviesJson["results"][element]["popularity"].toString(),
                 moviesJson["results"][element]["poster_path"],
-                moviesJson["results"][element]["release_date"],
+                formatDate(moviesJson["results"][element]["release_date"]),
                 moviesJson["results"][element]["title"],
                 moviesJson["results"][element]["video"],
                 moviesJson["results"][element]["vote_average"].toString(),
@@ -221,13 +223,15 @@ class _HomeScreen extends State<HomeScreen> {
               MaterialPageRoute(
                   builder: (BuildContext context) =>
                       InfoMovieScreen(
-                          popularMovies[position].id,
-                          popularMovies[position].overview,
-                          popularMovies[position].posterPath!,
-                          popularMovies[position].releaseDate,
-                          popularMovies[position].title,
-                          popularMovies[position].voteAverage,
-                          popularMovies[position].voteCount
+                          Favorite(
+                              popularMovies[position].id,
+                              popularMovies[position].overview,
+                              popularMovies[position].posterPath!,
+                              popularMovies[position].releaseDate,
+                              popularMovies[position].title,
+                              popularMovies[position].voteAverage,
+                              popularMovies[position].voteCount
+                          )
                       )
               )
           );
@@ -270,13 +274,15 @@ class _HomeScreen extends State<HomeScreen> {
               MaterialPageRoute(
                   builder: (BuildContext context) =>
                       InfoMovieScreen(
-                          playingMovies[position].id,
-                          playingMovies[position].overview,
-                          playingMovies[position].posterPath!,
-                          playingMovies[position].releaseDate,
-                          playingMovies[position].title,
-                          playingMovies[position].voteAverage,
-                          playingMovies[position].voteCount
+                          Favorite(
+                              playingMovies[position].id,
+                              playingMovies[position].overview,
+                              playingMovies[position].posterPath!,
+                              playingMovies[position].releaseDate,
+                              playingMovies[position].title,
+                              playingMovies[position].voteAverage,
+                              playingMovies[position].voteCount
+                          )
                       )
               )
           );
