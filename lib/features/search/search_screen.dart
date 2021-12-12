@@ -23,8 +23,10 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreen extends State<SearchScreen> {
   final textSearch = TextEditingController();
   List<Movie> foundMovies = [];
+  var alreadySearched = false;
 
   _requestSearchMovies() async {
+    alreadySearched = true;
     String urlWithQuery =
         "${url}search/movie/?api_key=$apiKey&query=${textSearch.text}&language=$language";
 
@@ -35,24 +37,30 @@ class _SearchScreen extends State<SearchScreen> {
     setState(() {
       var moviesJson = jsonDecode(response.body);
 
-      for (var element = 0; element < 20; element++) {
-        if (moviesJson["results"][element]["backdrop_path"] != null) {
-          foundMovies.add(Movie(
-            moviesJson["results"][element]["adult"],
-            moviesJson["results"][element]["backdrop_path"],
-            moviesJson["results"][element]["genre_ids"],
-            moviesJson["results"][element]["id"],
-            moviesJson["results"][element]["original_language"],
-            moviesJson["results"][element]["original_title"],
-            moviesJson["results"][element]["overview"],
-            moviesJson["results"][element]["popularity"].toString(),
-            moviesJson["results"][element]["poster_path"],
-            formatDate(moviesJson["results"][element]["release_date"]),
-            moviesJson["results"][element]["title"],
-            moviesJson["results"][element]["video"],
-            moviesJson["results"][element]["vote_average"].toString(),
-            moviesJson["results"][element]["vote_count"],
-          ));
+      if (!(moviesJson["results"].toString() == "[]")) {
+        for (var element = 0; element < 20; element++) {
+          try {
+            if (moviesJson["results"][element]["poster_path"] != null) {
+              foundMovies.add(Movie(
+                moviesJson["results"][element]["adult"],
+                moviesJson["results"][element]["backdrop_path"],
+                moviesJson["results"][element]["genre_ids"],
+                moviesJson["results"][element]["id"],
+                moviesJson["results"][element]["original_language"],
+                moviesJson["results"][element]["original_title"],
+                moviesJson["results"][element]["overview"],
+                moviesJson["results"][element]["popularity"].toString(),
+                moviesJson["results"][element]["poster_path"],
+                formatDate(moviesJson["results"][element]["release_date"]),
+                moviesJson["results"][element]["title"],
+                moviesJson["results"][element]["video"],
+                moviesJson["results"][element]["vote_average"].toString(),
+                moviesJson["results"][element]["vote_count"],
+              ));
+            }
+          } catch (e) {
+            break;
+          }
         }
       }
     });
@@ -62,67 +70,86 @@ class _SearchScreen extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) => SingleChildScrollView(
-          child: Column(
-        children: renderWidgets()//[
-          // SizedBox(
-          //   height: 48,
-          //   child: Row(
-          //     children: [
-          //       Expanded(
-          //         flex: 8,
-          //         child: TextField(
-          //           controller: textSearch,
-          //           cursorColor: const Color.fromARGB(255, 255, 22, 22),
-          //           decoration: const InputDecoration(
-          //             focusedBorder: OutlineInputBorder(
-          //               borderRadius: BorderRadius.all(Radius.circular(4)),
-          //               borderSide: BorderSide(
-          //                 width: 1,
-          //                 color: Color.fromARGB(255, 255, 22, 22),
-          //               ),
-          //             ),
-          //             labelStyle: TextStyle(
-          //               color: Color.fromARGB(255, 255, 22, 22),
-          //             ),
-          //             hintText: 'Buscar título ',
-          //             hintStyle:
-          //                 TextStyle(color: Color.fromARGB(255, 255, 22, 22)),
-          //             filled: true,
-          //             fillColor: Colors.white,
-          //           ),
-          //         ),
-          //       ),
-          //       Expanded(
-          //         flex: 2,
-          //         child: IconButton(
-          //             onPressed: () {
-          //               _requestSearchMovies();
-          //             },
-          //             icon: const Icon(
-          //               Icons.search,
-          //               color: Colors.white,
-          //             )),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          // SizedBox(
-          //   height: 165 * foundMovies.length.toDouble(),
-          //   child: ListView.builder(
-          //     itemCount: foundMovies.length,
-          //     itemBuilder: (BuildContext context, int position) {
-          //       return _buildItemList(position);
-          //     },
-          //   ),
-          // ),
-        //],
-      )),
+          child: Column(children: treatmentEmptyListSearch())),
     );
   }
 
-  List<Widget> renderWidgets() {
-    List<Widget> list = [];
+  List<Widget> treatmentEmptyListSearch() {
+    if (foundMovies.isEmpty && alreadySearched) {
+      return [
+        SizedBox(
+          height: 48,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 8,
+                child: TextField(
+                  controller: textSearch,
+                  cursorColor: const Color.fromARGB(255, 255, 22, 22),
+                  decoration: const InputDecoration(
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(4)),
+                      borderSide: BorderSide(
+                        width: 1,
+                        color: Color.fromARGB(255, 255, 22, 22),
+                      ),
+                    ),
+                    labelStyle: TextStyle(
+                      color: Color.fromARGB(255, 255, 22, 22),
+                    ),
+                    hintText: 'Buscar título ',
+                    hintStyle:
+                        TextStyle(color: Color.fromARGB(255, 255, 22, 22)),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: IconButton(
+                    onPressed: () {
+                      _requestSearchMovies();
+                    },
+                    icon: const Icon(
+                      Icons.search,
+                      color: Colors.white,
+                    )),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 200),
+          child: Column(children: [
+            const Icon(
+              Icons.search_off,
+              size: 60,
+              color: Color.fromARGB(255, 255, 22, 22),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                padding: const EdgeInsets.only(top: 4.0, left: 16.0, right: 20),
+                child: const Text(
+                  "Não foi encontrado nenhum resultado",
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ]),
+        )
+      ];
+    } else {
+      return bodySearchWidgets();
+    }
+  }
 
+  List<Widget> bodySearchWidgets() {
+    List<Widget> list = [];
     list.add(
       SizedBox(
         height: 48,

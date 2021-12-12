@@ -1,11 +1,12 @@
 import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:tecnoflix/features/infomovie/info_movie.dart';
 import 'package:tecnoflix/model/favorite.dart';
 import 'package:tecnoflix/model/movie.dart';
-import 'package:intl/intl.dart';
 import 'package:tecnoflix/utils/helper_functions.dart';
 
 const String url = "https://api.themoviedb.org/3/";
@@ -32,6 +33,11 @@ class _HomeScreen extends State<HomeScreen> {
     _requestPlayingMovies();
   }
 
+  Future<void> _refreshPage() async {
+    _requestPopularMovies();
+    _requestPlayingMovies();
+  }
+
   _requestPopularMovies() async {
     String urlWithQuery =
         "${url}movie/popular/?api_key=$apiKey&language=$language";
@@ -42,23 +48,22 @@ class _HomeScreen extends State<HomeScreen> {
       var moviesJson = jsonDecode(response.body);
 
       for (var element = 0; element < 20; element++) {
-        popularMovies.add(
-            Movie(
-              moviesJson["results"][element]["adult"],
-              moviesJson["results"][element]["backdrop_path"],
-              moviesJson["results"][element]["genre_ids"],
-              moviesJson["results"][element]["id"],
-              moviesJson["results"][element]["original_language"],
-              moviesJson["results"][element]["original_title"],
-              moviesJson["results"][element]["overview"],
-              moviesJson["results"][element]["popularity"].toString(),
-              moviesJson["results"][element]["poster_path"],
-              formatDate(moviesJson["results"][element]["release_date"]),
-              moviesJson["results"][element]["title"],
-              moviesJson["results"][element]["video"],
-              moviesJson["results"][element]["vote_average"].toString(),
-              moviesJson["results"][element]["vote_count"],
-            ));
+        popularMovies.add(Movie(
+          moviesJson["results"][element]["adult"],
+          moviesJson["results"][element]["backdrop_path"],
+          moviesJson["results"][element]["genre_ids"],
+          moviesJson["results"][element]["id"],
+          moviesJson["results"][element]["original_language"],
+          moviesJson["results"][element]["original_title"],
+          moviesJson["results"][element]["overview"],
+          moviesJson["results"][element]["popularity"].toString(),
+          moviesJson["results"][element]["poster_path"],
+          formatDate(moviesJson["results"][element]["release_date"]),
+          moviesJson["results"][element]["title"],
+          moviesJson["results"][element]["video"],
+          moviesJson["results"][element]["vote_average"].toString(),
+          moviesJson["results"][element]["vote_count"],
+        ));
       }
     });
   }
@@ -73,28 +78,26 @@ class _HomeScreen extends State<HomeScreen> {
     http.Response response = await http.get(Uri.parse(urlWithQuery));
 
     setState(() {
-
       var moviesJson = jsonDecode(response.body);
 
       for (var element = 0; element < 10; element++) {
         if (moviesJson["results"][element]["backdrop_path"] != null) {
-          playingMovies.add(
-              Movie(
-                moviesJson["results"][element]["adult"],
-                moviesJson["results"][element]["backdrop_path"],
-                moviesJson["results"][element]["genre_ids"],
-                moviesJson["results"][element]["id"],
-                moviesJson["results"][element]["original_language"],
-                moviesJson["results"][element]["original_title"],
-                moviesJson["results"][element]["overview"],
-                moviesJson["results"][element]["popularity"].toString(),
-                moviesJson["results"][element]["poster_path"],
-                formatDate(moviesJson["results"][element]["release_date"]),
-                moviesJson["results"][element]["title"],
-                moviesJson["results"][element]["video"],
-                moviesJson["results"][element]["vote_average"].toString(),
-                moviesJson["results"][element]["vote_count"],
-              ));
+          playingMovies.add(Movie(
+            moviesJson["results"][element]["adult"],
+            moviesJson["results"][element]["backdrop_path"],
+            moviesJson["results"][element]["genre_ids"],
+            moviesJson["results"][element]["id"],
+            moviesJson["results"][element]["original_language"],
+            moviesJson["results"][element]["original_title"],
+            moviesJson["results"][element]["overview"],
+            moviesJson["results"][element]["popularity"].toString(),
+            moviesJson["results"][element]["poster_path"],
+            formatDate(moviesJson["results"][element]["release_date"]),
+            moviesJson["results"][element]["title"],
+            moviesJson["results"][element]["video"],
+            moviesJson["results"][element]["vote_average"].toString(),
+            moviesJson["results"][element]["vote_count"],
+          ));
         }
       }
     });
@@ -102,108 +105,113 @@ class _HomeScreen extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding:
-              const EdgeInsets.only(top: 16.0, left: 16.0, bottom: 8.0),
-              child: const Text(
-                "Em cartaz",
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
+    return RefreshIndicator(
+      color: const Color.fromARGB(255, 255, 22, 22),
+      backgroundColor: Colors.black,
+      onRefresh: _refreshPage,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding:
+                    const EdgeInsets.only(top: 16.0, left: 16.0, bottom: 8.0),
+                child: const Text(
+                  "Em cartaz",
+                  style: TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 200.0,
-            child: PageView.builder(
-              itemCount: playingMovies.length,
-              itemBuilder: (BuildContext context, int position) {
-                return _buildItemPage(position);
-              },
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding:
-              const EdgeInsets.only(top: 16.0, left: 16.0, bottom: 8.0),
-              child: const Text(
-                "Series",
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
+            SizedBox(
+              height: 200.0,
+              child: PageView.builder(
+                itemCount: playingMovies.length,
+                itemBuilder: (BuildContext context, int position) {
+                  return _buildItemPage(position);
+                },
               ),
             ),
-          ),
-          SizedBox(
-            height: 200.0,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 6,
-              itemBuilder: (BuildContext context, int position) {
-                return _buildItemList(position);
-              },
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding:
-              const EdgeInsets.only(top: 16.0, left: 16.0, bottom: 8.0),
-              child: const Text(
-                "Em alta",
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding:
+                    const EdgeInsets.only(top: 16.0, left: 16.0, bottom: 8.0),
+                child: const Text(
+                  "Series",
+                  style: TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 200.0,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 6,
-              itemBuilder: (BuildContext context, int position) {
-                return _buildItemList(position + 6);
-              },
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding:
-              const EdgeInsets.only(top: 16.0, left: 16.0, bottom: 8.0),
-              child: const Text(
-                "Partiu um filme de ação?",
-                style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
+            SizedBox(
+              height: 200.0,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 6,
+                itemBuilder: (BuildContext context, int position) {
+                  return _buildItemList(position);
+                },
               ),
             ),
-          ),
-          SizedBox(
-            height: 200.0,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 6,
-              itemBuilder: (BuildContext context, int position) {
-                return _buildItemList(position + 12);
-              },
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding:
+                    const EdgeInsets.only(top: 16.0, left: 16.0, bottom: 8.0),
+                child: const Text(
+                  "Em alta",
+                  style: TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 50.0,
-          ),
-        ],
+            SizedBox(
+              height: 200.0,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 6,
+                itemBuilder: (BuildContext context, int position) {
+                  return _buildItemList(position + 6);
+                },
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding:
+                    const EdgeInsets.only(top: 16.0, left: 16.0, bottom: 8.0),
+                child: const Text(
+                  "Partiu um filme de ação?",
+                  style: TextStyle(
+                      fontSize: 20.0,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 200.0,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 6,
+                itemBuilder: (BuildContext context, int position) {
+                  return _buildItemList(position + 12);
+                },
+              ),
+            ),
+            const SizedBox(
+              height: 50.0,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -215,26 +223,21 @@ class _HomeScreen extends State<HomeScreen> {
       return InkWell(
         child: Container(
           color: Colors.white,
-          child: Image.network("$urlImage${popularMovies[position].posterPath}"),
+          child:
+              Image.network("$urlImage${popularMovies[position].posterPath}"),
         ),
         onTap: () {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      InfoMovieScreen(
-                          Favorite(
-                              popularMovies[position].id,
-                              popularMovies[position].overview,
-                              popularMovies[position].posterPath!,
-                              popularMovies[position].releaseDate,
-                              popularMovies[position].title,
-                              popularMovies[position].voteAverage,
-                              popularMovies[position].voteCount
-                          )
-                      )
-              )
-          );
+                  builder: (BuildContext context) => InfoMovieScreen(Favorite(
+                      popularMovies[position].id,
+                      popularMovies[position].overview,
+                      popularMovies[position].posterPath!,
+                      popularMovies[position].releaseDate,
+                      popularMovies[position].title,
+                      popularMovies[position].voteAverage,
+                      popularMovies[position].voteCount))));
         },
       );
     }
@@ -248,8 +251,8 @@ class _HomeScreen extends State<HomeScreen> {
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image:
-              NetworkImage("$urlImageBanner${playingMovies[position].backdropPath}"),
+              image: NetworkImage(
+                  "$urlImageBanner${playingMovies[position].backdropPath}"),
               fit: BoxFit.fill,
             ),
           ),
@@ -272,20 +275,14 @@ class _HomeScreen extends State<HomeScreen> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      InfoMovieScreen(
-                          Favorite(
-                              playingMovies[position].id,
-                              playingMovies[position].overview,
-                              playingMovies[position].posterPath!,
-                              playingMovies[position].releaseDate,
-                              playingMovies[position].title,
-                              playingMovies[position].voteAverage,
-                              playingMovies[position].voteCount
-                          )
-                      )
-              )
-          );
+                  builder: (BuildContext context) => InfoMovieScreen(Favorite(
+                      playingMovies[position].id,
+                      playingMovies[position].overview,
+                      playingMovies[position].posterPath!,
+                      playingMovies[position].releaseDate,
+                      playingMovies[position].title,
+                      playingMovies[position].voteAverage,
+                      playingMovies[position].voteCount))));
         },
       );
     }
