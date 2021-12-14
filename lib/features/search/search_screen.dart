@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -29,40 +30,48 @@ class _SearchScreen extends State<SearchScreen> {
     String urlWithQuery =
         "${url}search/movie/?api_key=$apiKey&query=${textSearch.text}&language=$language";
 
-    http.Response response = await http.get(Uri.parse(urlWithQuery));
+    try {
+      http.Response response = await http.get(Uri.parse(urlWithQuery));
 
-    foundMovies.clear();
+      foundMovies.clear();
 
-    setState(() {
-      var moviesJson = jsonDecode(response.body);
+      setState(() {
+        var moviesJson = jsonDecode(response.body);
 
-      if (!(moviesJson["results"].toString() == "[]")) {
-        for (var element = 0; element < 20; element++) {
-          try {
-            if (moviesJson["results"][element]["poster_path"] != null) {
-              foundMovies.add(Movie(
-                moviesJson["results"][element]["adult"],
-                moviesJson["results"][element]["backdrop_path"],
-                moviesJson["results"][element]["genre_ids"],
-                moviesJson["results"][element]["id"],
-                moviesJson["results"][element]["original_language"],
-                moviesJson["results"][element]["original_title"],
-                moviesJson["results"][element]["overview"],
-                moviesJson["results"][element]["popularity"].toString(),
-                moviesJson["results"][element]["poster_path"],
-                formatDate(moviesJson["results"][element]["release_date"]),
-                moviesJson["results"][element]["title"],
-                moviesJson["results"][element]["video"],
-                moviesJson["results"][element]["vote_average"].toString(),
-                moviesJson["results"][element]["vote_count"],
-              ));
+        if (!(moviesJson["results"].toString() == "[]")) {
+          for (var element = 0; element < 20; element++) {
+            try {
+              if (moviesJson["results"][element]["poster_path"] != null) {
+                foundMovies.add(Movie(
+                  moviesJson["results"][element]["adult"],
+                  moviesJson["results"][element]["backdrop_path"],
+                  moviesJson["results"][element]["genre_ids"],
+                  moviesJson["results"][element]["id"],
+                  moviesJson["results"][element]["original_language"],
+                  moviesJson["results"][element]["original_title"],
+                  moviesJson["results"][element]["overview"],
+                  moviesJson["results"][element]["popularity"].toString(),
+                  moviesJson["results"][element]["poster_path"],
+                  formatDate(moviesJson["results"][element]["release_date"]),
+                  moviesJson["results"][element]["title"],
+                  moviesJson["results"][element]["video"],
+                  moviesJson["results"][element]["vote_average"].toString(),
+                  moviesJson["results"][element]["vote_count"],
+                ));
+              }
+            } catch (e) {
+              break;
             }
-          } catch (e) {
-            break;
           }
         }
       }
-    });
+      );
+    } on SocketException catch(_) {
+      setState(() {
+        foundMovies = [];
+      });
+    }
+
   }
 
   @override

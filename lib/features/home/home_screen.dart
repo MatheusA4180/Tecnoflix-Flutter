@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -41,6 +42,37 @@ class _HomeScreen extends State<HomeScreen> {
     String urlWithQuery =
         "${url}movie/popular/?api_key=$apiKey&language=$language";
 
+    try {
+      http.Response response = await http.get(Uri.parse(urlWithQuery));
+
+      setState(() {
+        var moviesJson = jsonDecode(response.body);
+
+        for (var element = 0; element < 10; element++) {
+          if (moviesJson["results"][element]["backdrop_path"] != null) {
+            playingMovies.add(Movie(
+              moviesJson["results"][element]["adult"],
+              moviesJson["results"][element]["backdrop_path"],
+              moviesJson["results"][element]["genre_ids"],
+              moviesJson["results"][element]["id"],
+              moviesJson["results"][element]["original_language"],
+              moviesJson["results"][element]["original_title"],
+              moviesJson["results"][element]["overview"],
+              moviesJson["results"][element]["popularity"].toString(),
+              moviesJson["results"][element]["poster_path"],
+              formatDate(moviesJson["results"][element]["release_date"]),
+              moviesJson["results"][element]["title"],
+              moviesJson["results"][element]["video"],
+              moviesJson["results"][element]["vote_average"].toString(),
+              moviesJson["results"][element]["vote_count"],
+            ));
+          }
+        }
+      });
+    } on SocketException catch(_) {
+      playingMovies = [];
+    }
+
     http.Response response = await http.get(Uri.parse(urlWithQuery));
 
     setState(() {
@@ -74,32 +106,37 @@ class _HomeScreen extends State<HomeScreen> {
     String urlWithQuery =
         "${url}discover/movie/?api_key=$apiKey&primary_release_date.gte=$currentDateFormat&primary_release_date.lte=$currentDateFormat&language=$language";
 
-    http.Response response = await http.get(Uri.parse(urlWithQuery));
+    try {
+      http.Response response = await http.get(Uri.parse(urlWithQuery));
 
-    setState(() {
-      var moviesJson = jsonDecode(response.body);
+      setState(() {
+        var moviesJson = jsonDecode(response.body);
 
-      for (var element = 0; element < 10; element++) {
-        if (moviesJson["results"][element]["backdrop_path"] != null) {
-          playingMovies.add(Movie(
-            moviesJson["results"][element]["adult"],
-            moviesJson["results"][element]["backdrop_path"],
-            moviesJson["results"][element]["genre_ids"],
-            moviesJson["results"][element]["id"],
-            moviesJson["results"][element]["original_language"],
-            moviesJson["results"][element]["original_title"],
-            moviesJson["results"][element]["overview"],
-            moviesJson["results"][element]["popularity"].toString(),
-            moviesJson["results"][element]["poster_path"],
-            formatDate(moviesJson["results"][element]["release_date"]),
-            moviesJson["results"][element]["title"],
-            moviesJson["results"][element]["video"],
-            moviesJson["results"][element]["vote_average"].toString(),
-            moviesJson["results"][element]["vote_count"],
-          ));
+        for (var element = 0; element < 10; element++) {
+          if (moviesJson["results"][element]["backdrop_path"] != null) {
+            playingMovies.add(Movie(
+              moviesJson["results"][element]["adult"],
+              moviesJson["results"][element]["backdrop_path"],
+              moviesJson["results"][element]["genre_ids"],
+              moviesJson["results"][element]["id"],
+              moviesJson["results"][element]["original_language"],
+              moviesJson["results"][element]["original_title"],
+              moviesJson["results"][element]["overview"],
+              moviesJson["results"][element]["popularity"].toString(),
+              moviesJson["results"][element]["poster_path"],
+              formatDate(moviesJson["results"][element]["release_date"]),
+              moviesJson["results"][element]["title"],
+              moviesJson["results"][element]["video"],
+              moviesJson["results"][element]["vote_average"].toString(),
+              moviesJson["results"][element]["vote_count"],
+            ));
+          }
         }
-      }
-    });
+      });
+    } on SocketException catch(_) {
+      playingMovies = [];
+    }
+
   }
 
   @override

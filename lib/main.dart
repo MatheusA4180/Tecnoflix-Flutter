@@ -11,7 +11,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Splash Screen',
       theme: ThemeData(
         textSelectionTheme: const TextSelectionThemeData(
           cursorColor: Color.fromARGB(255, 255, 22, 22),

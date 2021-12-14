@@ -125,7 +125,8 @@ class _LoginScreen extends State<LoginScreen> {
                           var response = auth(textEmailEditText.text,
                               textPasswordEditText.text);
                           response.then(
-                              (value) => navigationToHome(value, context));
+                              (value) => navigationToHome(value, context)
+                          );
                         },
                         child: const Text("ENTRAR"),
                       ),

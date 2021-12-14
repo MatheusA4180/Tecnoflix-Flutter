@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:tecnoflix/data/remote/firebase_firestore.dart';
 import 'package:tecnoflix/features/infomovie/info_movie.dart';
@@ -29,10 +31,19 @@ class _FavoriteScreen extends State<FavoriteScreen> {
     });
   }
 
-  _setStateFavoritesList(List<Favorite> value) {
-    setState(() {
-      favoriteMovies = value;
-    });
+  _setStateFavoritesList(List<Favorite> value) async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        setState(() {
+          favoriteMovies = value;
+        });
+      } else {
+        favoriteMovies = [];
+      }
+    } on SocketException catch(_) {
+      favoriteMovies = [];
+    }
   }
 
   @override
@@ -94,7 +105,8 @@ class _FavoriteScreen extends State<FavoriteScreen> {
                 margin:
                     const EdgeInsets.only(top: 12.0, left: 8.0, bottom: 12.0),
                 child: Image.network(
-                    "$urlImage${favoriteMovies[position].posterPath}"),
+                    "$urlImage${favoriteMovies[position].posterPath}"
+                ),
               ),
             ),
             Expanded(
@@ -118,7 +130,8 @@ class _FavoriteScreen extends State<FavoriteScreen> {
                     alignment: Alignment.centerLeft,
                     child: Container(
                       padding: const EdgeInsets.only(
-                          top: 12.0, left: 16.0, right: 20),
+                          top: 12.0, left: 16.0, right: 20
+                      ),
                       child: const Text(
                         "Data de lançamento:",
                         style: TextStyle(
@@ -132,7 +145,8 @@ class _FavoriteScreen extends State<FavoriteScreen> {
                     alignment: Alignment.centerLeft,
                     child: Container(
                       padding: const EdgeInsets.only(
-                          top: 4.0, left: 16.0, right: 20),
+                          top: 4.0, left: 16.0, right: 20
+                      ),
                       child: Text(
                         favoriteMovies[position].releaseDate,
                         style: const TextStyle(
@@ -158,7 +172,10 @@ class _FavoriteScreen extends State<FavoriteScreen> {
                       favoriteMovies[position].releaseDate,
                       favoriteMovies[position].title,
                       favoriteMovies[position].voteAverage,
-                      favoriteMovies[position].voteCount))));
+                      favoriteMovies[position].voteCount)
+                  )
+              )
+          );
         },
       );
     }
